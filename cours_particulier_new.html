@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours Particuliers - Maths & Physique</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%); color: #1e293b; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 600px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 40px 30px; text-align: center; position: relative; }
+        .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .header p { font-size: 14px; opacity: 0.9; font-weight: 500; }
+        .admin-btn { position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.2); border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; }
+        .admin-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        .progress-bar { display: flex; justify-content: space-between; align-items: center; padding: 30px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; overflow-x: auto; }
+        .progress-step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; min-width: 60px; }
+        .progress-step:not(:last-child)::after { content: ''; position: absolute; top: 20px; left: 50%; width: 100%; height: 2px; background: #cbd5e1; z-index: 0; }
+        .progress-step.active:not(:last-child)::after { background: #2563eb; }
+        .step-circle { width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #64748b; position: relative; z-index: 1; margin-bottom: 8px; }
+        .progress-step.active .step-circle { background: #2563eb; border-color: #2563eb; color: white; }
+        .progress-step.completed .step-circle { background: #10b981; border-color: #10b981; color: white; }
+        .step-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; }
+        .progress-step.active .step-label { color: #2563eb; }
+        .content { padding: 40px 30px; min-height: 400px; display: flex; flex-direction: column; }
+        .page { display: none; animation: fadeIn 0.3s ease-in; }
+        .page.active { display: flex; flex-direction: column; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: #1e293b; }
+        .page-subtitle { font-size: 14px; color: #64748b; margin-bottom: 30px; line-height: 1.5; }
+        .selection-grid { display: grid; gap: 16px; margin-bottom: 30px; }
+        .selection-card { padding: 20px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f8fafc; }
+        .selection-card:hover { border-color: #2563eb; background: #eff6ff; transform: translateY(-2px); }
+        .selection-card.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+        .selection-card-icon { font-size: 32px; margin-bottom: 8px; }
+        .selection-card-title { font-weight: 600; font-size: 16px; color: #1e293b; margin-bottom: 4px; }
+        .selection-card-desc { font-size: 13px; color: #64748b; }
+        .teacher-card { padding: 20px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; background: #f8fafc; }
+        .teacher-card:hover { border-color: #2563eb; background: #eff6ff; transform: translateY(-2px); }
+        .teacher-card.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+        .teacher-avatar { width: 60px; height: 60px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+        .teacher-name { font-weight: 600; font-size: 16px; color: #1e293b; margin-bottom: 4px; }
+        .teacher-specialty { font-size: 13px; color: #64748b; }
+        .timeslot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 30px; }
+        .timeslot { padding: 16px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f8fafc; }
+        .timeslot:hover { border-color: #2563eb; background: #eff6ff; }
+        .timeslot.selected { border-color: #2563eb; background: #2563eb; color: white; }
+        .timeslot-day { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .timeslot-time { font-size: 13px; opacity: 0.8; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px; color: #1e293b; font-family: inherit; }
+        .form-textarea { resize: vertical; min-height: 80px; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .summary-section { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2563eb; }
+        .summary-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .summary-value { font-size: 16px; font-weight: 600; color: #1e293b; }
+        .button-group { display: flex; gap: 12px; margin-top: auto; }
+        button { flex: 1; padding: 14px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary { background: #f97316; color: white; }
+        .btn-primary:hover { background: #ea580c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
+        .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: #e2e8f0; color: #1e293b; }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .payment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; }
+        .payment-option { padding: 24px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f8fafc; }
+        .payment-option:hover { border-color: #2563eb; background: #eff6ff; transform: translateY(-2px); }
+        .payment-option.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+        .payment-icon { font-size: 32px; margin-bottom: 8px; }
+        .payment-title { font-weight: 600; font-size: 16px; color: #1e293b; }
+        .confirmation-icon { font-size: 60px; text-align: center; margin-bottom: 24px; }
+        .confirmation-message { text-align: center; margin-bottom: 30px; }
+        .confirmation-message h2 { font-size: 20px; color: #10b981; margin-bottom: 8px; }
+        .confirmation-message p { color: #64748b; font-size: 14px; line-height: 1.6; }
+        .login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .login-modal.active { display: flex; }
+        .login-panel { background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 400px; width: 100%; padding: 40px; text-align: center; }
+        .login-panel h2 { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: #1e293b; }
+        .login-panel .form-group { text-align: left; }
+        .login-error { background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+        .admin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .admin-modal.active { display: flex; }
+        .admin-panel { background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .admin-header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+        .admin-header h2 { font-size: 24px; font-weight: 700; }
+        .admin-close { background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        .admin-close:hover { background: rgba(255, 255, 255, 0.3); }
+        .admin-content { padding: 30px; }
+        .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+        .admin-tab { background: none; border: none; padding: 12px 16px; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .admin-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .admin-section { margin-bottom: 30px; }
+        .admin-section h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .btn-add { background: #10b981; color: white; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; }
+        .btn-add:hover { background: #059669; }
+        .teacher-item, .timeslot-item { background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; display: flex; gap: 12px; align-items: center; }
+        .teacher-inputs, .timeslot-inputs { flex: 1; display: flex; gap: 8px; }
+        .teacher-inputs input, .timeslot-inputs input { flex: 1; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; }
+        .btn-small { padding: 8px 12px; font-size: 13px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-delete { background: #ef4444; color: white; }
+        .btn-delete:hover { background: #dc2626; }
+        .help-button { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; z-index: 900; }
+        .help-button:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6); }
+        .help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 950; align-items: center; justify-content: center; padding: 20px; }
+        .help-modal.active { display: flex; }
+        .help-panel { background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 400px; width: 100%; padding: 40px; text-align: center; position: relative; }
+        .help-close { position: absolute; top: 15px; right: 15px; background: #e2e8f0; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; color: #1e293b; }
+        .help-close:hover { background: #cbd5e1; }
+        .help-icon { font-size: 48px; margin-bottom: 16px; }
+        .help-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; color: #1e293b; }
+        .help-message { font-size: 15px; color: #64748b; line-height: 1.6; margin-bottom: 24px; }
+        .help-phone-link { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 14px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; transition: all 0.2s ease; }
+        .help-phone-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        @media (max-width: 600px) { .progress-bar { gap: 4px; padding: 15px; } .step-label { display: none; } .step-circle { width: 32px; height: 32px; font-size: 12px; } .timeslot-grid { grid-template-columns: 1fr; } .payment-options { grid-template-columns: 1fr; } .help-button { bottom: 20px; right: 20px; width: 54px; height: 54px; font-size: 24px; } }
+    </style>
+</head>
+<body>
+    <button class="help-button" onclick="openHelpModal()">?</button>
+    <div class="help-modal" id="help-modal">
+        <div class="help-panel">
+            <button class="help-close" onclick="closeHelpModal()">✕</button>
+            <div class="help-icon">🆘</div>
+            <h2 class="help-title">Besoin d'aide ?</h2>
+            <p class="help-message">Si vous rencontrez un problème ou avez une question, n'hésitez pas à nous contacter directement.</p>
+            <a href="tel:0664783156" class="help-phone-link">📞 Appelez-nous : 06 64 78 31 56</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <button class="admin-btn" onclick="openAdminLogin()">⚙️ Admin</button>
+            <h1>Cours Particuliers</h1>
+            <p>Mathématiques & Physique</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-step completed" id="step1"><div class="step-circle">✓</div><div class="step-label">Accueil</div></div>
+            <div class="progress-step" id="step2"><div class="step-circle">2</div><div class="step-label">Matière</div></div>
+            <div class="progress-step" id="step3"><div class="step-circle">3</div><div class="step-label">Niveau</div></div>
+            <div class="progress-step" id="step4"><div class="step-circle">4</div><div class="step-label">Chapitre</div></div>
+            <div class="progress-step" id="step5"><div class="step-circle">5</div><div class="step-label">Professeur</div></div>
+            <div class="progress-step" id="step6"><div class="step-circle">6</div><div class="step-label">Créneau</div></div>
+            <div class="progress-step" id="step7"><div class="step-circle">7</div><div class="step-label">Récap</div></div>
+            <div class="progress-step" id="step8"><div class="step-circle">8</div><div class="step-label">Infos</div></div>
+            <div class="progress-step" id="step9"><div class="step-circle">9</div><div class="step-label">Paiement</div></div>
+        </div>
+
+        <div class="content">
+            <div class="page active" id="page-accueil">
+                <h2 class="page-title">Bienvenue 👋</h2>
+                <p class="page-subtitle">Réservez votre cours particulier en quelques clics. Nos professeurs expérimentés vous aideront à progresser en mathématiques et physique.</p>
+                <div style="flex: 1;"></div>
+                <div class="button-group"><button class="btn-primary" onclick="goToPage(2)">Commencer la réservation</button></div>
+            </div>
+
+            <div class="page" id="page-matiere">
+                <h2 class="page-title">Quelle matière ?</h2>
+                <p class="page-subtitle">Choisissez la matière pour laquelle vous souhaitez prendre un cours.</p>
+                <div class="selection-grid">
+                    <div class="selection-card" onclick="selectSubject('maths')"><div class="selection-card-icon">📐</div><div class="selection-card-title">Mathématiques</div><div class="selection-card-desc">Algèbre, géométrie, analyse...</div></div>
+                    <div class="selection-card" onclick="selectSubject('physique')"><div class="selection-card-icon">⚛️</div><div class="selection-card-title">Physique</div><div class="selection-card-desc">Mécanique, électricité, optique...</div></div>
+                </div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(1)">Retour</button><button class="btn-primary" id="btn-matiere" onclick="goToPage(3)" disabled>Continuer</button></div>
+            </div>
+
+            <div class="page" id="page-niveau">
+                <h2 class="page-title">Quel est votre niveau ?</h2>
+                <p class="page-subtitle">Sélectionnez votre année d'étude actuelle.</p>
+                <div class="selection-grid">
+                    <div class="selection-card" onclick="selectLevel('6e')"><div class="selection-card-title">6ème</div></div>
+                    <div class="selection-card" onclick="selectLevel('5e')"><div class="selection-card-title">5ème</div></div>
+                    <div class="selection-card" onclick="selectLevel('4e')"><div class="selection-card-title">4ème</div></div>
+                    <div class="selection-card" onclick="selectLevel('3e')"><div class="selection-card-title">3ème</div></div>
+                    <div class="selection-card" onclick="selectLevel('2nd')"><div class="selection-card-title">Seconde</div></div>
+                    <div class="selection-card" onclick="selectLevel('1ere')"><div class="selection-card-title">Première</div></div>
+                    <div class="selection-card" onclick="selectLevel('term')"><div class="selection-card-title">Terminale</div></div>
+                    <div class="selection-card" onclick="selectLevel('ptsi')"><div class="selection-card-title">Prépa PTSI</div></div>
+                    <div class="selection-card" onclick="selectLevel('pt')"><div class="selection-card-title">Prépa PT</div></div>
+                </div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(2)">Retour</button><button class="btn-primary" id="btn-niveau" onclick="goToPage(4)" disabled>Continuer</button></div>
+            </div>
+
+            <div class="page" id="page-chapitre">
+                <h2 class="page-title">Quel chapitre ?</h2>
+                <p class="page-subtitle">Écrivez le chapitre que vous souhaitez étudier (optionnel).</p>
+                <div class="form-group"><label class="form-label">Chapitre / Sujet</label><input type="text" class="form-textarea" id="custom-chapter" placeholder="Ex: Limites et continuité, Dérivation, Optique géométrique..." style="min-height: 60px;"></div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(3)">Retour</button><button class="btn-primary" onclick="goToPage(5)">Continuer</button></div>
+            </div>
+
+            <div class="page" id="page-professeur">
+                <h2 class="page-title">Qui vous enseignera ?</h2>
+                <p class="page-subtitle">Choisissez parmi nos professeurs qualifiés.</p>
+                <div class="selection-grid" id="teachers-grid"></div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(4)">Retour</button><button class="btn-primary" id="btn-prof" onclick="goToPage(6)" disabled>Continuer</button></div>
+            </div>
+
+            <div class="page" id="page-creneau">
+                <h2 class="page-title">Quel créneau ?</h2>
+                <p class="page-subtitle">Sélectionnez votre horaire préféré.</p>
+                <div class="timeslot-grid" id="timeslots-grid"></div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(5)">Retour</button><button class="btn-primary" id="btn-creneau" onclick="goToPage(7)" disabled>Continuer</button></div>
+            </div>
+
+            <div class="page" id="page-recap">
+                <h2 class="page-title">Récapitulatif</h2>
+                <p class="page-subtitle">Vérifiez vos informations avant de continuer.</p>
+                <div class="summary-section"><div class="summary-label">Matière</div><div class="summary-value" id="summary-matiere">-</div></div>
+                <div class="summary-section"><div class="summary-label">Niveau</div><div class="summary-value" id="summary-niveau">-</div></div>
+                <div class="summary-section"><div class="summary-label">Chapitre</div><div class="summary-value" id="summary-chapitre">-</div></div>
+                <div class="summary-section"><div class="summary-label">Professeur</div><div class="summary-value" id="summary-prof">-</div></div>
+                <div class="summary-section"><div class="summary-label">Créneau</div><div class="summary-value" id="summary-creneau">-</div></div>
+                <div class="summary-section"><div class="summary-label">Prix</div><div style="font-size: 24px; font-weight: 700; color: #2563eb;" id="summary-price">0 €</div></div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(6)">Retour</button><button class="btn-primary" onclick="goToPage(8)">Continuer</button></div>
+            </div>
+
+            <div class="page" id="page-coordonnees">
+                <h2 class="page-title">Vos coordonnées</h2>
+                <p class="page-subtitle">Nous aurons besoin de vos informations pour la réservation.</p>
+                <div class="form-group"><label class="form-label">Prénom *</label><input type="text" class="form-input" id="client-prenom" placeholder="Votre prénom"></div>
+                <div class="form-group"><label class="form-label">Nom *</label><input type="text" class="form-input" id="client-nom" placeholder="Votre nom"></div>
+                <div class="form-group"><label class="form-label">Numéro de téléphone *</label><input type="tel" class="form-input" id="client-phone" placeholder="06 XX XX XX XX"></div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(7)">Retour</button><button class="btn-primary" id="btn-coordonnees" onclick="goToPage(9)" disabled>Continuer</button></div>
+            </div>
+
+            <div class="page" id="page-paiement">
+                <h2 class="page-title">Mode de paiement</h2>
+                <p class="page-subtitle">Comment souhaitez-vous payer ?</p>
+                <div class="payment-options">
+                    <div class="payment-option" onclick="selectPayment('cash')"><div class="payment-icon">💵</div><div class="payment-title">Cash</div></div>
+                    <div class="payment-option" onclick="selectPayment('virement')"><div class="payment-icon">🏦</div><div class="payment-title">Virement</div></div>
+                </div>
+                <div class="button-group"><button class="btn-secondary" onclick="goToPage(8)">Retour</button><button class="btn-primary" id="btn-paiement" onclick="submitBooking()" disabled>Confirmer la réservation</button></div>
+            </div>
+
+            <div class="page" id="page-confirmation">
+                <div class="confirmation-icon">✅</div>
+                <div class="confirmation-message">
+                    <h2>Réservation confirmée !</h2>
+                    <p>Votre réservation a été enregistrée avec succès. Vous recevrez un email de confirmation avec tous les détails.</p>
+                </div>
+                <div class="summary-section"><div class="summary-label">Professeur</div><div class="summary-value" id="final-prof">-</div></div>
+                <div class="summary-section"><div class="summary-label">Date et heure</div><div class="summary-value" id="final-creneau">-</div></div>
+                <div class="summary-section"><div class="summary-label">Mode de paiement</div><div class="summary-value" id="final-payment">-</div></div>
+                <div style="flex: 1;"></div>
+                <div class="button-group"><button class="btn-primary" onclick="startOver()">Réserver un autre cours</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-modal" id="login-modal">
+        <div class="login-panel">
+            <h2>Connexion Admin</h2>
+            <div class="login-error" id="login-error" style="display: none;"></div>
+            <div class="form-group"><label class="form-label">Identifiant</label><input type="text" class="form-input" id="login-username" placeholder="Entrez votre identifiant"></div>
+            <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-input" id="login-password" placeholder="Entrez votre mot de passe" onkeypress="if(event.key==='Enter') loginAdmin()"></div>
+            <div style="display: flex; gap: 12px;"><button class="btn-secondary" style="flex: 1;" onclick="closeAdminLogin()">Annuler</button><button class="btn-primary" style="flex: 1;" onclick="loginAdmin()">Connexion</button></div>
+        </div>
+    </div>
+
+    <div class="admin-modal" id="admin-modal">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h2>Panneau d'Administration</h2>
+                <button class="admin-close" onclick="closeAdmin()">✕</button>
+            </div>
+            <div class="admin-content">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="switchAdminTab('teachers')">Professeurs</button>
+                    <button class="admin-tab" onclick="switchAdminTab('timeslots')">Créneaux</button>
+                    <button class="admin-tab" onclick="switchAdminTab('settings')">Paramètres</button>
+                </div>
+                <div class="tab-content active" id="tab-teachers">
+                    <div class="admin-section">
+                        <h3>Gérer les professeurs</h3>
+                        <button class="btn-add" onclick="addTeacher()">+ Ajouter un professeur</button>
+                        <div id="teachers-list"></div>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-timeslots">
+                    <div class="admin-section">
+                        <h3>Gérer les créneaux</h3>
+                        <button class="btn-add" onclick="addTimeslot()">+ Ajouter un créneau</button>
+                        <div id="timeslots-list"></div>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-settings">
+                    <div class="admin-section">
+                        <h3>Paramètres généraux</h3>
+                        <div class="form-group"><label class="form-label">Email Formspree</label><input type="text" class="form-input" id="formspree-id" placeholder="Votre ID Formspree"></div>
+                        <div class="form-group"><label class="form-label">Prix du cours (€)</label><input type="number" class="form-input" id="course-price" placeholder="0" value="0"></div>
+                        <h3 style="margin-top: 30px;">Sécurité</h3>
+                        <div class="form-group"><label class="form-label">Identifiant Admin</label><input type="text" class="form-input" id="admin-username" placeholder="Votre identifiant"></div>
+                        <div class="form-group"><label class="form-label">Mot de passe Admin</label><input type="password" class="form-input" id="admin-password" placeholder="Votre mot de passe"></div>
+                        <button class="btn-primary" onclick="saveSettings()" style="width: 100%;">Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedSubject = null, selectedLevel = null, selectedChapter = null, selectedTeacher = null, selectedTimeslot = null, selectedPayment = null, isAdminLoggedIn = false;
+
+        const defaultTeachers = [
+            { id: 'pierre', name: 'Pierre', specialty: 'Expert en mathématiques, physique et sciences de l\'ingénieur' }
+        ];
+
+        const defaultTimeslots = [
+            { day: 'Lundi', time: '18:00 - 20:00', id: 'lun-18h' },
+            { day: 'Mardi', time: '18:00 - 20:00', id: 'mar-18h' },
+            { day: 'Mercredi', time: '18:00 - 20:00', id: 'mer-18h' },
+            { day: 'Jeudi', time: '18:00 - 20:00', id: 'jeu-18h' },
+            { day: 'Vendredi', time: '18:00 - 19:00', id: 'ven-18h' },
+            { day: 'Vendredi', time: '19:00 - 20:00', id: 'ven-19h' },
+            { day: 'Vendredi', time: '18:00 - 20:00', id: 'ven-18-20h' },
+            { day: 'Samedi', time: '08:00 - 10:00', id: 'sam-08h' },
+            { day: 'Samedi', time: '10:00 - 12:00', id: 'sam-10h' },
+            { day: 'Samedi', time: '14:00 - 16:00', id: 'sam-14h' },
+            { day: 'Samedi', time: '16:00 - 18:00', id: 'sam-16h' },
+            { day: 'Dimanche', time: '08:00 - 10:00', id: 'dim-08h' },
+            { day: 'Dimanche', time: '10:00 - 12:00', id: 'dim-10h' },
+            { day: 'Dimanche', time: '14:00 - 16:00', id: 'dim-14h' },
+            { day: 'Dimanche', time: '16:00 - 18:00', id: 'dim-16h' }
+        ];
+
+        function initData() {
+            // FORCER la mise à jour avec les bonnes données
+            localStorage.setItem('teachers', JSON.stringify(defaultTeachers));
+            localStorage.setItem('timeslots', JSON.stringify(defaultTimeslots));
+            
+            if (!localStorage.getItem('formspree-id')) localStorage.setItem('formspree-id', '');
+            if (!localStorage.getItem('course-price')) localStorage.setItem('course-price', '0');
+            if (!localStorage.getItem('admin-username')) {
+                localStorage.setItem('admin-username', 'admin');
+                localStorage.setItem('admin-password', 'admin123');
+            }
+        }
+
+        function getTeachers() { return JSON.parse(localStorage.getItem('teachers') || '[]'); }
+        function getTimeslots() { return JSON.parse(localStorage.getItem('timeslots') || '[]'); }
+
+        function goToPage(pageNum) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const pageIds = ['page-accueil', 'page-matiere', 'page-niveau', 'page-chapitre', 'page-professeur', 'page-creneau', 'page-recap', 'page-coordonnees', 'page-paiement', 'page-confirmation'];
+            if (pageIds[pageNum - 1]) document.getElementById(pageIds[pageNum - 1]).classList.add('active');
+            if (pageNum === 7) updateSummary();
+            updateProgress(pageNum);
+            document.querySelector('.content').scrollTop = 0;
+        }
+
+        function updateProgress(pageNum) {
+            const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7', 'step8', 'step9'];
+            steps.forEach((stepId, index) => {
+                const step = document.getElementById(stepId);
+                step.classList.remove('active', 'completed');
+                if (index < pageNum - 1) step.classList.add('completed');
+                else if (index === pageNum - 1) step.classList.add('active');
+            });
+        }
+
+        function selectSubject(subject) { selectedSubject = subject; document.querySelectorAll('#page-matiere .selection-card').forEach(c => c.classList.remove('selected')); event.currentTarget.classList.add('selected'); document.getElementById('btn-matiere').disabled = false; }
+        function selectLevel(level) { selectedLevel = level; document.querySelectorAll('#page-niveau .selection-card').forEach(c => c.classList.remove('selected')); event.currentTarget.classList.add('selected'); document.getElementById('btn-niveau').disabled = false; }
+        function selectTeacher(teacherId) { selectedTeacher = teacherId; document.querySelectorAll('#teachers-grid .teacher-card').forEach(c => c.classList.remove('selected')); event.currentTarget.classList.add('selected'); document.getElementById('btn-prof').disabled = false; }
+        function selectTimeslot(slot) { selectedTimeslot = slot; document.querySelectorAll('.timeslot').forEach(c => c.classList.remove('selected')); event.currentTarget.classList.add('selected'); document.getElementById('btn-creneau').disabled = false; }
+        function selectPayment(method) { selectedPayment = method; document.querySelectorAll('.payment-option').forEach(c => c.classList.remove('selected')); event.currentTarget.classList.add('selected'); document.getElementById('btn-paiement').disabled = false; }
+
+        function displayTeachers() {
+            const teachers = getTeachers();
+            const grid = document.getElementById('teachers-grid');
+            grid.innerHTML = '';
+            teachers.forEach(teacher => {
+                const div = document.createElement('div');
+                div.className = 'teacher-card';
+                div.onclick = () => selectTeacher(teacher.id);
+                const initial = teacher.name.charAt(0).toUpperCase();
+                div.innerHTML = `<div class="teacher-avatar">${initial}</div><div class="teacher-name">${teacher.name}</div><div class="teacher-specialty">${teacher.specialty}</div>`;
+                grid.appendChild(div);
+            });
+        }
+
+        function displayTimeslots() {
+            const timeslots = getTimeslots();
+            const grid = document.getElementById('timeslots-grid');
+            grid.innerHTML = '';
+            timeslots.forEach(slot => {
+                const div = document.createElement('div');
+                div.className = 'timeslot';
+                div.onclick = () => selectTimeslot(slot.id);
+                div.innerHTML = `<div class="timeslot-day">${slot.day}</div><div class="timeslot-time">${slot.time}</div>`;
+                grid.appendChild(div);
+            });
+        }
+
+        function updateSummary() {
+            const matiereName = selectedSubject === 'maths' ? 'Mathématiques' : 'Physique';
+            document.getElementById('summary-matiere').textContent = matiereName;
+            document.getElementById('summary-niveau').textContent = selectedLevel;
+            const chapter = document.getElementById('custom-chapter').value || '(Pas de préférence)';
+            document.getElementById('summary-chapitre').textContent = chapter;
+            const teachers = getTeachers();
+            const teacher = teachers.find(t => t.id === selectedTeacher);
+            document.getElementById('summary-prof').textContent = teacher ? teacher.name : '-';
+            const timeslots = getTimeslots();
+            const slot = timeslots.find(s => s.id === selectedTimeslot);
+            if (slot) document.getElementById('summary-creneau').textContent = `${slot.day} ${slot.time}`;
+            const price = localStorage.getItem('course-price') || '0';
+            document.getElementById('summary-price').textContent = price + ' €';
+        }
+
+        function validateCoordinates() {
+            const prenom = document.getElementById('client-prenom').value.trim();
+            const nom = document.getElementById('client-nom').value.trim();
+            const phone = document.getElementById('client-phone').value.trim();
+            document.getElementById('btn-coordonnees').disabled = !(prenom && nom && phone);
+        }
+
+        function submitBooking() {
+            updateSummary();
+            const prenom = document.getElementById('client-prenom').value;
+            const nom = document.getElementById('client-nom').value;
+            const phone = document.getElementById('client-phone').value;
+            const teachers = getTeachers();
+            const teacher = teachers.find(t => t.id === selectedTeacher);
+            const timeslots = getTimeslots();
+            const slot = timeslots.find(s => s.id === selectedTimeslot);
+            const price = localStorage.getItem('course-price') || '0';
+            const chapter = document.getElementById('custom-chapter').value || '(Pas de préférence)';
+            document.getElementById('final-prof').textContent = teacher ? teacher.name : '-';
+            if (slot) document.getElementById('final-creneau').textContent = `${slot.day} ${slot.time}`;
+            const paymentLabel = selectedPayment === 'cash' ? 'Cash' : 'Virement bancaire';
+            document.getElementById('final-payment').textContent = paymentLabel;
+            const formspreeId = localStorage.getItem('formspree-id');
+            const bookingData = { prenom, nom, telephone: phone, matiere: selectedSubject === 'maths' ? 'Mathématiques' : 'Physique', niveau: selectedLevel, chapitre: chapter, professeur: teacher ? teacher.name : '-', jour: slot ? slot.day : '', horaire: slot ? slot.time : '', modePaiement: paymentLabel, prix: price + ' €', date: new Date().toLocaleString('fr-FR') };
+            if (formspreeId) fetch(`https://formspree.io/f/${formspreeId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bookingData) }).catch(err => console.error('Erreur Formspree:', err));
+            goToPage(10);
+        }
+
+        function startOver() {
+            selectedSubject = null; selectedLevel = null; selectedChapter = null; selectedTeacher = null; selectedTimeslot = null; selectedPayment = null;
+            document.getElementById('custom-chapter').value = '';
+            document.getElementById('client-prenom').value = '';
+            document.getElementById('client-nom').value = '';
+            document.getElementById('client-phone').value = '';
+            goToPage(1);
+        }
+
+        function openAdminLogin() {
+            document.getElementById('login-modal').classList.add('active');
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-username').focus();
+        }
+
+        function closeAdminLogin() { document.getElementById('login-modal').classList.remove('active'); }
+
+        function loginAdmin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const correctUsername = localStorage.getItem('admin-username');
+            const correctPassword = localStorage.getItem('admin-password');
+            if (username === correctUsername && password === correctPassword) {
+                isAdminLoggedIn = true;
+                closeAdminLogin();
+                openAdmin();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('login-error').textContent = '❌ Identifiant ou mot de passe incorrect';
+            }
+        }
+
+        function openAdmin() {
+            if (!isAdminLoggedIn) { openAdminLogin(); return; }
+            document.getElementById('admin-modal').classList.add('active');
+            loadAdminData();
+        }
+
+        function closeAdmin() { document.getElementById('admin-modal').classList.remove('active'); isAdminLoggedIn = false; }
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function loadAdminData() { loadTeachers(); loadTimeslots(); loadSettings(); }
+        function loadTeachers() {
+            const teachers = getTeachers();
+            const list = document.getElementById('teachers-list');
+            list.innerHTML = '';
+            teachers.forEach((teacher, index) => {
+                const div = document.createElement('div');
+                div.className = 'teacher-item';
+                const initial = teacher.name.charAt(0).toUpperCase();
+                div.innerHTML = `<div style="width: 50px; height: 50px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px;">${initial}</div><div style="flex: 1;"><div style="font-weight: 600; color: #1e293b;">${teacher.name}</div><div style="font-size: 13px; color: #64748b;">${teacher.specialty}</div></div><button class="btn-small btn-delete" onclick="deleteTeacher(${index})">Supprimer</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        function addTeacher() {
+            const teachers = getTeachers();
+            const name = prompt('Nom du professeur:');
+            if (name) {
+                const specialty = prompt('Spécialité:');
+                teachers.push({ id: 'prof-' + Date.now(), name: name, specialty: specialty || 'Spécialiste' });
+                localStorage.setItem('teachers', JSON.stringify(teachers));
+                displayTeachers();
+                loadTeachers();
+            }
+        }
+
+        function deleteTeacher(index) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce professeur ?')) {
+                const teachers = getTeachers();
+                teachers.splice(index, 1);
+                localStorage.setItem('teachers', JSON.stringify(teachers));
+                displayTeachers();
+                loadTeachers();
+            }
+        }
+
+        function loadTimeslots() {
+            const timeslots = getTimeslots();
+            const list = document.getElementById('timeslots-list');
+            list.innerHTML = '';
+            timeslots.forEach((slot, index) => {
+                const div = document.createElement('div');
+                div.className = 'timeslot-item';
+                div.innerHTML = `<div class="timeslot-inputs"><input type="text" value="${slot.day}" onchange="updateTimeslot(${index}, 'day', this.value)" placeholder="Jour"><input type="text" value="${slot.time}" onchange="updateTimeslot(${index}, 'time', this.value)" placeholder="Horaire"></div><button class="btn-small btn-delete" onclick="removeTimeslot(${index})">Supprimer</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        function addTimeslot() { const timeslots = getTimeslots(); timeslots.push({ day: 'Nouveau jour', time: 'HH:MM - HH:MM', id: 'slot-' + Date.now() }); localStorage.setItem('timeslots', JSON.stringify(timeslots)); displayTimeslots(); loadTimeslots(); }
+        function updateTimeslot(index, field, value) { const timeslots = getTimeslots(); if (field === 'day') timeslots[index].day = value; if (field === 'time') timeslots[index].time = value; localStorage.setItem('timeslots', JSON.stringify(timeslots)); displayTimeslots(); }
+        function removeTimeslot(index) { const timeslots = getTimeslots(); timeslots.splice(index, 1); localStorage.setItem('timeslots', JSON.stringify(timeslots)); displayTimeslots(); loadTimeslots(); }
+        function loadSettings() {
+            document.getElementById('formspree-id').value = localStorage.getItem('formspree-id') || '';
+            document.getElementById('course-price').value = localStorage.getItem('course-price') || '0';
+            document.getElementById('admin-username').value = localStorage.getItem('admin-username') || 'admin';
+            document.getElementById('admin-password').value = localStorage.getItem('admin-password') || 'admin123';
+        }
+
+        function saveSettings() {
+            localStorage.setItem('formspree-id', document.getElementById('formspree-id').value);
+            localStorage.setItem('course-price', document.getElementById('course-price').value);
+            localStorage.setItem('admin-username', document.getElementById('admin-username').value);
+            localStorage.setItem('admin-password', document.getElementById('admin-password').value);
+            alert('✅ Paramètres sauvegardés !');
+        }
+
+        function openHelpModal() { document.getElementById('help-modal').classList.add('active'); }
+        function closeHelpModal() { document.getElementById('help-modal').classList.remove('active'); }
+        document.getElementById('help-modal').addEventListener('click', function(e) { if (e.target === this) closeHelpModal(); });
+
+        document.getElementById('client-prenom').addEventListener('input', validateCoordinates);
+        document.getElementById('client-nom').addEventListener('input', validateCoordinates);
+        document.getElementById('client-phone').addEventListener('input', validateCoordinates);
+
+        initData();
+        displayTeachers();
+        displayTimeslots();
+        updateProgress(1);
+    </script>
+</body>
+</html>
