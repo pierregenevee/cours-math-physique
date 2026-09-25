@@ -326,8 +326,10 @@
         ];
 
         function initData() {
-            if (!localStorage.getItem('teachers')) localStorage.setItem('teachers', JSON.stringify(defaultTeachers));
-            if (!localStorage.getItem('timeslots')) localStorage.setItem('timeslots', JSON.stringify(defaultTimeslots));
+            // FORCER la mise à jour avec les bonnes données
+            localStorage.setItem('teachers', JSON.stringify(defaultTeachers));
+            localStorage.setItem('timeslots', JSON.stringify(defaultTimeslots));
+            
             if (!localStorage.getItem('formspree-id')) localStorage.setItem('formspree-id', '');
             if (!localStorage.getItem('course-price')) localStorage.setItem('course-price', '0');
             if (!localStorage.getItem('admin-username')) {
@@ -429,7 +431,7 @@
             if (slot) document.getElementById('final-creneau').textContent = `${slot.day} ${slot.time}`;
             const paymentLabel = selectedPayment === 'cash' ? 'Cash' : 'Virement bancaire';
             document.getElementById('final-payment').textContent = paymentLabel;
-            const formspreeId = localStorage.getItem('formspree-id');
+            const formspreeId = 'myegolpv'; // ID Formspree de pierre.genevee@gmail.com
             const bookingData = { prenom, nom, telephone: phone, matiere: selectedSubject === 'maths' ? 'Mathématiques' : 'Physique', niveau: selectedLevel, chapitre: chapter, professeur: teacher ? teacher.name : '-', jour: slot ? slot.day : '', horaire: slot ? slot.time : '', modePaiement: paymentLabel, prix: price + ' €', date: new Date().toLocaleString('fr-FR') };
             if (formspreeId) fetch(`https://formspree.io/f/${formspreeId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bookingData) }).catch(err => console.error('Erreur Formspree:', err));
             goToPage(10);
