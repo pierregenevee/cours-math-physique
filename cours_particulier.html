@@ -326,10 +326,8 @@
         ];
 
         function initData() {
-            // FORCER la mise à jour avec les bonnes données
-            localStorage.setItem('teachers', JSON.stringify(defaultTeachers));
-            localStorage.setItem('timeslots', JSON.stringify(defaultTimeslots));
-            
+            if (!localStorage.getItem('teachers')) localStorage.setItem('teachers', JSON.stringify(defaultTeachers));
+            if (!localStorage.getItem('timeslots')) localStorage.setItem('timeslots', JSON.stringify(defaultTimeslots));
             if (!localStorage.getItem('formspree-id')) localStorage.setItem('formspree-id', '');
             if (!localStorage.getItem('course-price')) localStorage.setItem('course-price', '0');
             if (!localStorage.getItem('admin-username')) {
